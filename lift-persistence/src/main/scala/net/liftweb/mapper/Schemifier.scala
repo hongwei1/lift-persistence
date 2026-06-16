@@ -243,29 +243,30 @@ object Schemifier extends Loggable {
 
   private def ensureColumns(performWrite: Boolean, logFunc: (=> AnyRef) => Unit, table: BaseMetaMapper, connection: SuperConnection, actualTableNames: HashMap[String, String]): Collector = {
     val cmds = new ListBuffer[String]()
+    val tableNameLC = table._dbTableNameLC.toLowerCase
+    // Fetch all columns for this table in a single JDBC round trip instead of
+    // one call per field — avoids K*N metadata queries on startup for N tables
+    // each with K fields.
+    val existingColumns: Set[String] = {
+      val buf = new scala.collection.mutable.HashSet[String]()
+      val md = connection.getMetaData
+      using(md.getColumns(null, getDefaultSchemaName(connection), actualTableNames(table._dbTableNameLC), null))(rs =>
+        while (rs.next) {
+          if (rs.getString(3).toLowerCase == tableNameLC)
+            buf += rs.getString(4).toLowerCase
+        })
+      buf.toSet
+    }
+
     val rc = table.mappedFields.toList.flatMap {
       field =>
-      var hasColumn = 0
-      var cols: List[String] = Nil
-      val totalColCnt = field.dbColumnCount
-      val md = connection.getMetaData
+      val presentCols = field.dbColumnNames(field.name).map(_.toLowerCase).filter(existingColumns.contains)
+      presentCols.foreach(col => logger.trace("Column exists: %s.%s ".format(table.dbTableName, col)))
 
-      using(md.getColumns(null, getDefaultSchemaName(connection), actualTableNames(table._dbTableNameLC), null))(rs =>
-        while (hasColumn < totalColCnt && rs.next) {
-          val tableName = rs.getString(3).toLowerCase
-          val columnName = rs.getString(4).toLowerCase
-
-          if (tableName == table._dbTableNameLC.toLowerCase && field.dbColumnNames(field.name).map(_.toLowerCase).contains(columnName)) {
-            cols = columnName :: cols
-            hasColumn = hasColumn + 1
-            logger.trace("Column exists: %s.%s ".format(table.dbTableName, columnName))
-      
-          }
-        })
       // FIXME deal with column types
-      (field.dbColumnNames(field.name).filter(f => !cols.map(_.toLowerCase).contains(f.toLowerCase))).foreach {colName =>
+      (field.dbColumnNames(field.name).filter(f => !existingColumns.contains(f.toLowerCase))).foreach {colName =>
         logger.trace("Column does not exist: %s.%s ".format(table.dbTableName, colName))
-          
+
         cmds += maybeWrite(performWrite, logFunc, connection) {
           () => "ALTER TABLE "+table._dbTableNameLC+" "+connection.driverType.alterAddColumn+" "+field.fieldCreatorString(connection.driverType, colName)
         }
@@ -278,11 +279,9 @@ object Schemifier extends Loggable {
       }
 
       field.dbAddedColumn.toList
-
     }
 
     Collector(rc, cmds.toList)
-
   }
 
   private def ensureIndexes(performWrite: Boolean, logFunc: (=> AnyRef) => Unit, table: BaseMetaMapper, connection: SuperConnection, actualTableNames: HashMap[String, String]): Collector = {
