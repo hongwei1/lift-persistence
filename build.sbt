@@ -2,13 +2,13 @@ import Dependencies._
 
 ThisBuild / organization       := "net.liftweb"
 ThisBuild / version            := "3.5.0-lift-persistence"
-ThisBuild / homepage           := Some(url("https://github.com/hongwei1/lift-persistence"))
+ThisBuild / homepage           := Some(url("https://github.com/OpenBankProject/lift-persistence"))
 ThisBuild / licenses           += ("Apache License, Version 2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 ThisBuild / startYear          := Some(2006)
 ThisBuild / organizationName   := "WorldWide Conferencing, LLC"
 
-val scala212Version = "2.12.12"
-val scala213Version = "2.13.2"
+val scala212Version = "2.12.20"
+val scala213Version = "2.13.16"
 
 ThisBuild / scalaVersion       := scala212Version
 ThisBuild / crossScalaVersions := Seq(scala212Version, scala213Version)
