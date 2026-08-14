@@ -1,0 +1,10 @@
+# JitPack's default sbt build runs `sbt -Dsbt.log.noformat=true clean publishM2`,
+# which publishes only the default Scala version. That is why
+# com.github.OpenBankProject.lift-persistence:lift-persistence_2.13 resolves to
+# 404 for every tag up to v1.0.4, even though crossScalaVersions has always
+# listed 2.13.
+#
+# `+publishM2` cross-publishes every entry in crossScalaVersions, so a single tag
+# yields both lift-persistence_2.12 and lift-persistence_2.13.
+install:
+  - sbt -Dsbt.log.noformat=true clean +publishM2
