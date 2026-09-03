@@ -27,7 +27,7 @@ import net.liftweb.common._
 import net.liftweb.util._
 
 import scala.annotation.tailrec
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 
 /**
  * This is the supertrait of all traits that can be mixed into a MappedField.
@@ -645,4 +645,3 @@ trait LifecycleCallbacks {
   def beforeDelete: Unit = {}
   def afterDelete: Unit = {}
 }
-

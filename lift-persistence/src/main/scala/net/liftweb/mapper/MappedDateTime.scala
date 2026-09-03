@@ -45,7 +45,7 @@ abstract class MappedDateTime[T<:Mapper[T]](val fieldOwner: T) extends MappedFie
    */
   def format(d: Date): String = MapperDateConverter.formatDateTime(d)
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[Date] = typeTag[Date]
 
   /**
@@ -178,4 +178,3 @@ abstract class MappedDateTime[T<:Mapper[T]](val fieldOwner: T) extends MappedFie
 
   override def toString: String = if(get==null) "NULL" else format(get)
 }
-

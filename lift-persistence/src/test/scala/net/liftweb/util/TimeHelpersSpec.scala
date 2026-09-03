@@ -67,15 +67,15 @@ class TimeHelpersSpec extends Specification with ScalaCheck with TimeAmountsGen 
       3.seconds.after(new Date(0)) must beTrue
     }
     "be implicitly converted to a Long" in forAllTimeZones {
-      (3.seconds == 3000L) must_== true
+      (3.seconds.millis == 3000L) must_== true
     }
     "be compared to an int" in forAllTimeZones {
-      (3.seconds == 3000) must_== true
-      (3.seconds != 2000) must_== true
+      (3.seconds.millis == 3000) must_== true
+      (3.seconds.millis != 2000) must_== true
     }
     "be compared to a long" in forAllTimeZones {
-      (3.seconds == 3000L) must_== true
-      (3.seconds != 2000L) must_== true
+      (3.seconds.millis == 3000L) must_== true
+      (3.seconds.millis != 2000L) must_== true
     }
     "be compared to another TimeSpan" in forAllTimeZones {
       3.seconds must_== 3.seconds

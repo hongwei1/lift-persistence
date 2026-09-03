@@ -2,7 +2,7 @@ package net.liftweb.util
 
 import net.liftweb.common.Box
 import scala.xml.NodeSeq
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 
 /**
  * A trait that allows an object to tell you about itself

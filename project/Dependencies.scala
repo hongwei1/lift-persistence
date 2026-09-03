@@ -51,6 +51,14 @@ object Dependencies {
   lazy val scalactic       = "org.scalactic"     %% "scalactic"  % "3.1.2"   % Test
   lazy val scalatest       = "org.scalatest"     %% "scalatest"  % "3.1.2"   % Test
 
+  // The legacy test stack predates Scala 3. Keep it for Scala 2 consumers and
+  // use the first maintained cross-published line for the Scala 3 build.
+  lazy val specs2Scala3      = "org.specs2"    %% "specs2-core"          % "4.20.9" % Test
+  lazy val scalacheckScala3  = "org.specs2"    %% "specs2-scalacheck"    % specs2Scala3.revision % Test
+  lazy val specs2MatchersScala3 = "org.specs2" %% "specs2-matcher-extra" % specs2Scala3.revision % Test
+  lazy val scalacticScala3   = "org.scalactic" %% "scalactic"            % "3.2.19" % Test
+  lazy val scalatestScala3   = "org.scalatest" %% "scalatest"            % "3.2.19" % Test
+
   // Aliases
   lazy val h2 = h2database
 

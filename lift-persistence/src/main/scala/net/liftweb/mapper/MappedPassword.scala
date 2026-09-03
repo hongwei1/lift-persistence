@@ -54,7 +54,7 @@ extends MappedField[String, T] {
 
   def salt = this.salt_i
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[String] = typeTag[String]
 
   /**

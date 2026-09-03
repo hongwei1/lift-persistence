@@ -32,6 +32,8 @@ trait BaseMapper extends FieldContainer {
 
   def dbName: String
   def save: Boolean
+  private[mapper] def saveBase: Boolean
+  private[mapper] def deleteBase: Boolean
 }
 
 trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo {
@@ -85,11 +87,13 @@ trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo 
     this
   }
 
-  def save: Boolean = {
+  private[mapper] def saveBase: Boolean = {
     runSafe {
       getSingleton.save(this)
     }
   }
+
+  def save: Boolean = saveBase
 
   def htmlLine : NodeSeq = {
     getSingleton.doHtmlLine(this)
@@ -134,13 +138,15 @@ trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo 
   /**
    * Delete the model from the RDBMS
    */
-  def delete_! : Boolean = {
+  private[mapper] def deleteBase: Boolean = {
     if (!db_can_delete_?) false else
     runSafe {
       was_deleted_? = getSingleton.delete_!(this)
       was_deleted_?
     }
   }
+
+  def delete_! : Boolean = deleteBase
 
   /**
    * Get the fields (in order) for displaying a form
@@ -242,9 +248,9 @@ trait LongKeyedMapper[OwnerType <: LongKeyedMapper[OwnerType]] extends KeyedMapp
   self: OwnerType =>
 }
 
-trait BaseKeyedMapper extends BaseMapper {
+trait BaseKeyedMapper { self: BaseMapper =>
   type TheKeyType
-  type KeyedMapperType <: KeyedMapper[TheKeyType, KeyedMapperType]
+  type KeyedMapperType <: MapperType
 
   def primaryKeyField: MappedField[TheKeyType, MapperType] with IndexedField[TheKeyType]
   /**
@@ -253,12 +259,12 @@ trait BaseKeyedMapper extends BaseMapper {
   def delete_! : Boolean
 }
 
-trait BaseLongKeyedMapper extends BaseKeyedMapper {
+trait BaseLongKeyedMapper extends BaseKeyedMapper { self: BaseMapper =>
   override type TheKeyType = Long
 }
 
 trait IdPK /* extends BaseLongKeyedMapper */ {
-  self: BaseLongKeyedMapper =>
+  self: BaseLongKeyedMapper with BaseMapper =>
   def primaryKeyField: MappedLongIndex[MapperType] = id
   object id extends MappedLongIndex[MapperType](this.asInstanceOf[MapperType])
 }

@@ -58,7 +58,7 @@ abstract class MappedString[T<:Mapper[T]](val fieldOwner: T,val maxLen: Int) ext
 
   def dbFieldClass: Class[String] = classOf[String]
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[String] = typeTag[String]
 
   /**

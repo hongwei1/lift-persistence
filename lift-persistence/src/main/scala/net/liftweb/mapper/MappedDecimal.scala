@@ -47,7 +47,10 @@ import scala.xml.{Text, NodeSeq}
  * @param context The MathContext that controls precision and rounding
  * @param scale Controls the scale of the underlying BigDecimal
  */
-abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : MathContext, val scale : Int) extends MappedField[BigDecimal,T] {
+abstract class MappedDecimal[T <: Mapper[T]] private (val fieldOwner : T, val context : MathContext, val scale : Int, directConstructor: Boolean) extends MappedField[BigDecimal,T] {
+
+  def this(fieldOwner : T, context : MathContext, scale : Int) =
+    this(fieldOwner, context, scale, true)
 
   /**
    * Constructs a MappedDecimal with the specified initial value and context.
@@ -58,7 +61,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
    * @param context The MathContext that controls precision and rounding
    */
   def this(fieldOwner : T, value : BigDecimal, context : MathContext) = {
-    this(fieldOwner, context, value.scale)
+    this(fieldOwner, context, value.bigDecimal.scale(), true)
     wholeSet(coerce(value))
   }
 
@@ -71,7 +74,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
    * @param value The initial value
    */
   def this(fieldOwner : T, value : BigDecimal) = {
-    this(fieldOwner, MathContext.UNLIMITED, value.scale)
+    this(fieldOwner, MathContext.UNLIMITED, value.bigDecimal.scale(), true)
     wholeSet(coerce(value))
   }
 
@@ -89,7 +92,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
     orgData = in
   }
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[BigDecimal] = typeTag[BigDecimal]
 
   /**
@@ -208,4 +211,3 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
     colName + " DECIMAL" + suffix + notNullAppender()
   }
 }
-

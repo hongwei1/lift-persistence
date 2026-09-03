@@ -69,7 +69,7 @@ abstract class MappedLongIndex[T<:Mapper[T]](theOwner: T) extends MappedLong[T](
 
 }
 
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 
 abstract class MappedEnumList[T<:Mapper[T], ENUM <: Enumeration](val fieldOwner: T, val enum: ENUM)(implicit val manifest: TypeTag[Seq[ENUM#Value]]) extends MappedField[Seq[ENUM#Value], T] {
   type MyElem = ENUM#Value
@@ -217,7 +217,7 @@ abstract class MappedNullableLong[T<:Mapper[T]](val fieldOwner: T) extends Mappe
    */
   def targetSQLType: Int = Types.BIGINT
 
-  import scala.reflect.runtime.universe._
+  import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[Box[Long]] = typeTag[Box[Long]]
 
   /**
@@ -338,7 +338,7 @@ abstract class MappedLong[T<:Mapper[T]](val fieldOwner: T) extends MappedField[L
   private var data: Long = defaultValue
   private var orgData: Long = defaultValue
 
-  import scala.reflect.runtime.universe._
+  import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[Long] = typeTag[Long]
 
   /**
@@ -459,4 +459,3 @@ abstract class MappedLong[T<:Mapper[T]](val fieldOwner: T) extends MappedField[L
    */
   def fieldCreatorString(dbType: DriverType, colName: String): String = colName + " " + dbType.longColumnType + notNullAppender()
 }
-

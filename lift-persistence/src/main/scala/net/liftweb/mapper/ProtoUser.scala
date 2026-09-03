@@ -436,4 +436,3 @@ trait MegaProtoUser[T <: MegaProtoUser[T]] extends ProtoUser[T] {
   def localeDisplayName = "locale"
 
 }
-
