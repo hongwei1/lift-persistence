@@ -32,14 +32,43 @@ class FieldFinder[T: ClassTag](metaMapper: AnyRef, logger: common.Logger) {
     def findForClass(clz: Class[?]): List[Method] = clz match {
       case null => Nil
       case c =>
+        // Scala 2 backs `object x` with a field `x$module` typed as the
+        // object's own class.  Scala 3 backs both `object x` and `lazy val x`
+        // with `x$lzy<n>` typed `java.lang.Object`, so the Scala 2 pairing -
+        // match the name, then require the field's type to equal the
+        // accessor's return type - cannot be reproduced: neither half holds.
+        def deMod(in: String): String =
+          if (in.endsWith("$module")) in.substring(0, in.length - 7)
+          else in.indexOf("$lzy") match {
+            case -1 => in
+            case i  => in.substring(0, i)
+          }
+
+        val backingFieldNames: Set[String] =
+          c.getDeclaredFields.iterator.map(f => deMod(f.getName)).toSet
+
         def validActualType(meth: Method): Boolean = {
-          // Scala 3 emits mapper `object` fields as lazy accessors.  Invoking
-          // those accessors while MetaMapper's superclass is being
-          // initialised can observe an uninitialised value and discard every
-          // field.  The concrete return type carries the same information and
-          // does not require running user initialization code.
-          val returnType = meth.getReturnType
-          meth.getName != "primaryKeyField" && typeFilter(returnType)
+          // Unlike the Scala 2 variant this one must decide without invoking
+          // the accessor: Scala 3 compiles mapper `object` fields to lazy
+          // accessors, and calling one while MetaMapper's superclass is still
+          // initialising observes an uninitialised value and discards every
+          // field.
+          //
+          // Two shapes are legitimate mapped fields, and both are recognisable
+          // statically.  An `object` field's accessor returns the synthetic
+          // class of that object - `Decoy$realField$` for `object realField` -
+          // which is what isMagicObject tests.  A `val`/`lazy val` field (how
+          // ProtoUser declares its fields) returns the plain field type, but
+          // has a backing field of the same name.
+          //
+          // Requiring one of those two is what keeps a plain
+          // `def alias: MappedString[T] = realField` out.  Such a def has no
+          // backing field and returns the generic type; admitting it does not
+          // merely add a spurious entry - it shares one instance with the real
+          // field, so the field is reported twice under the def's name and the
+          // real name disappears from mappedFields entirely.
+          typeFilter(meth.getReturnType) &&
+            (isMagicObject(meth) || backingFieldNames.contains(meth.getName))
         }
 
         c.getDeclaredMethods.toList
