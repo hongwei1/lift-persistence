@@ -32,8 +32,6 @@ trait BaseMapper extends FieldContainer {
 
   def dbName: String
   def save: Boolean
-  private[mapper] def saveBase: Boolean
-  private[mapper] def deleteBase: Boolean
 }
 
 trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo {
@@ -87,13 +85,11 @@ trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo 
     this
   }
 
-  private[mapper] def saveBase: Boolean = {
+  def save: Boolean = {
     runSafe {
       getSingleton.save(this)
     }
   }
-
-  def save: Boolean = saveBase
 
   def htmlLine : NodeSeq = {
     getSingleton.doHtmlLine(this)
@@ -138,15 +134,13 @@ trait Mapper[A<:Mapper[A]] extends BaseMapper with Serializable with SourceInfo 
   /**
    * Delete the model from the RDBMS
    */
-  private[mapper] def deleteBase: Boolean = {
+  def delete_! : Boolean = {
     if (!db_can_delete_?) false else
     runSafe {
       was_deleted_? = getSingleton.delete_!(this)
       was_deleted_?
     }
   }
-
-  def delete_! : Boolean = deleteBase
 
   /**
    * Get the fields (in order) for displaying a form
@@ -253,6 +247,18 @@ trait BaseKeyedMapper { self: BaseMapper =>
   type KeyedMapperType <: MapperType
 
   def primaryKeyField: MappedField[TheKeyType, MapperType] with IndexedField[TheKeyType]
+  /**
+   * Save the model to the RDBMS.
+   *
+   * Declared here, not just inherited from the self type, because ManyToMany
+   * and any other stackable trait extending BaseKeyedMapper reaches the rest of
+   * the chain through `super.save`, and that only resolves against a member of
+   * this trait. Restoring `extends BaseMapper` would supply it as well, but
+   * Scala 3 rejects that with a cyclic reference at LongKeyedMapper (as it does
+   * the original `KeyedMapperType <: KeyedMapper[TheKeyType, KeyedMapperType]`
+   * bound); both were verified separately against 3.3.8.
+   */
+  def save: Boolean
   /**
    * Delete the model from the RDBMS
    */

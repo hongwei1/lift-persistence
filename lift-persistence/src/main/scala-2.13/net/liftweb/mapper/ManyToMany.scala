@@ -41,7 +41,7 @@ trait ManyToMany extends BaseKeyedMapper {
    * If they are all successful returns true.
    */
   abstract override def save: Boolean = {
-    saveBase && manyToManyFields.forall(_.save)
+    super.save && manyToManyFields.forall(_.save)
   }
 
   /**
@@ -51,7 +51,7 @@ trait ManyToMany extends BaseKeyedMapper {
    * If they are all successful returns true.
    */
   abstract override def delete_! : Boolean = {
-    deleteBase &&
+    super.delete_! &&
       manyToManyFields.forall( _.delete_!)
   }
 
