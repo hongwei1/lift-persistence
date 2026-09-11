@@ -39,7 +39,11 @@ trait FieldIdentifier {
  * Associate a FieldIdentifier with a NodeSeq
  */
 case class FieldError(field: FieldIdentifier, msg: NodeSeq) {
-  override def toString = (field.uniqueFieldId openOr "") + " : " + msg
+  // `uniqueFieldId.toString`, not `openOr ""`: the original relied on Scala 2's
+  // any2stringadd to concatenate the Box itself, so this rendered "Full(id) : x"
+  // and "Empty : x". Scala 3 dropped that conversion, but unwrapping instead
+  // would silently change the text every 2.12/2.13 consumer already logs.
+  override def toString = field.uniqueFieldId.toString + " : " + msg
 }
 
 object FieldError {
