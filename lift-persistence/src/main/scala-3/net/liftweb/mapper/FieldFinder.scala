@@ -67,6 +67,14 @@ class FieldFinder[T: ClassTag](metaMapper: AnyRef, logger: common.Logger) {
           // merely add a spurious entry - it shares one instance with the real
           // field, so the field is reported twice under the def's name and the
           // real name disappears from mappedFields entirely.
+          //
+          // One Scala 2 behaviour is deliberately not reproduced: that variant
+          // invoked each accessor inside a try/catch and dropped any that threw,
+          // so a field whose initializer fails went missing and the entity still
+          // loaded.  Deciding statically means such a field now survives here and
+          // throws where MetaMapper invokes it, failing the whole entity instead
+          // of one column.  Restoring the old behaviour would require the very
+          // invocation this variant exists to avoid.
           typeFilter(meth.getReturnType) &&
             (isMagicObject(meth) || backingFieldNames.contains(meth.getName))
         }
