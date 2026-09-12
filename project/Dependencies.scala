@@ -42,6 +42,9 @@ object Dependencies {
   // Scope available only in test classpath, non-transitive by default.
   lazy val derby      = "org.apache.derby"         % "derby"                    % "10.16.1.1" % Test
   lazy val h2database = "com.h2database"           % "h2"                       % "2.4.240"   % Test
+  // DbProviders.PostgreSqlProvider is skipped unless a local Postgres answers, so
+  // this only adds a driver to the test classpath; it does not require a database.
+  lazy val postgresql = "org.postgresql"           % "postgresql"               % "42.7.11"   % Test
 
   lazy val specs2      = "org.specs2"        %% "specs2-core"          % "4.9.4"         % Test
   lazy val scalacheck  = "org.specs2"        %% "specs2-scalacheck"    % specs2.revision % Test

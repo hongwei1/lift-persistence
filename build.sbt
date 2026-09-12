@@ -62,7 +62,8 @@ lazy val `lift-persistence` =
         jbcrypt,
         // test
         h2,
-        derby
+        derby,
+        postgresql
       ),
       Test / initialize := {
         System.setProperty(
