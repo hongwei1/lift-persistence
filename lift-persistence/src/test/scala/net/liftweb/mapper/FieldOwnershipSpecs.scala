@@ -48,6 +48,12 @@ class FieldOwnershipSpecs extends Specification {
     // FieldFinder implementations cannot drift apart silently. User declares its
     // fields in a trait as vals (Scala 3 backs those with `name$lzy<n>` erased to
     // Object); the others use the `object` form.
+    "register a bridged field once, not twice" in {
+      // Without the bridge filter the synthetic `MappedString thing()` is accepted
+      // alongside the real accessor and the column is registered twice.
+      Bridged.mappedFields.map(_.name).toList.sorted must_== List("id", "thing")
+    }
+
     "find the same fields on every Scala version" in {
       Dog.mappedFields.map(_.name).toList.sorted must_==
         List("id", "name", "owner", "price", "weight")
@@ -78,3 +84,18 @@ class Borrower extends LongKeyedMapper[Borrower] with IdPK {
   def lent: Lender.lent.type = Lender.lent
 }
 object Borrower extends Borrower with LongKeyedMetaMapper[Borrower]
+
+// A trait declaring the field with its general type, implemented by an `object`
+// whose accessor returns the narrower synthetic class. Scala 3 emits a bridge
+// `MappedString thing()` next to the real `Bridged$thing$ thing()` so the trait's
+// signature is satisfied. Both are public and zero-arg, and Method.equals compares
+// return types, so .distinct keeps both unless bridges are filtered out.
+trait DeclaresThing[T <: Mapper[T]] { self: T =>
+  def thing: MappedString[T]
+}
+
+class Bridged extends LongKeyedMapper[Bridged] with IdPK with DeclaresThing[Bridged] {
+  def getSingleton = Bridged
+  object thing extends MappedString(this, 32)
+}
+object Bridged extends Bridged with LongKeyedMetaMapper[Bridged]
