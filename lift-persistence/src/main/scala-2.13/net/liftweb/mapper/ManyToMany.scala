@@ -20,7 +20,6 @@ package mapper
 import common._
 
 import scala.annotation.tailrec
-import scala.language.existentials
 
 /**
  * Add this trait to a Mapper to add support for many-to-many relationships

@@ -1,7 +1,7 @@
 import Dependencies._
 
 ThisBuild / organization       := "net.liftweb"
-ThisBuild / version            := "3.5.0-lift-persistence-dev-20260903"
+ThisBuild / version            := "3.5.0-lift-persistence"
 ThisBuild / homepage           := Some(url("https://github.com/OpenBankProject/lift-persistence"))
 ThisBuild / licenses           += ("Apache License, Version 2.0", url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 ThisBuild / startYear          := Some(2006)

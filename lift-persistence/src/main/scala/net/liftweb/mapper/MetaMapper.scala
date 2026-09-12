@@ -21,7 +21,6 @@ import java.lang.reflect.Method
 import java.sql.{ResultSet, Types, PreparedStatement}
 import java.util.{Date, Locale}
 
-import scala.language.existentials
 
 import scala.collection.mutable.{ListBuffer, HashMap}
 import scala.collection.immutable.{SortedMap, TreeMap}

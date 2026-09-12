@@ -10,7 +10,7 @@ import scala.annotation.tailrec
  *
  * @author nafg
  */
-trait ManyToMany extends BaseKeyedMapper with BaseMapper {
+trait ManyToMany extends BaseKeyedMapper {
   this: KeyedMapper[_, _] =>
 
   private[this] type K = TheKeyType

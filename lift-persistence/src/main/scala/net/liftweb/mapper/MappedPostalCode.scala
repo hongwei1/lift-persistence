@@ -23,7 +23,6 @@ import scala.xml.{Text, Elem}
 
 import common._
 import util._
-import util.ValueHolder.tToVHT
 import Helpers._
 // OBP fork: webkit removed — SHtml.select _toForm builders dropped; S.? localisation
 // keys inlined as literals and S.locale replaced with Locale.getDefault.

@@ -47,6 +47,14 @@ import scala.xml.{Text, NodeSeq}
  * @param context The MathContext that controls precision and rounding
  * @param scale Controls the scale of the underlying BigDecimal
  */
+// `directConstructor` carries no information and is never read. Its only job is to
+// give the primary constructor an arity that the three public ones cannot collide
+// with: Scala 3 fails to resolve `this(fieldOwner, context, value.scale)` against
+// the three-parameter form while T is F-bounded (`T <: Mapper[T]`), reporting E134
+// "none of the overloaded alternatives match" even though the arguments match one
+// exactly. Do not inline it away — and note this costs consumers nothing, because
+// the public three-parameter constructor still emits the same signature it always
+// did: `public MappedDecimal(T, java.math.MathContext, int)`.
 abstract class MappedDecimal[T <: Mapper[T]] private (val fieldOwner : T, val context : MathContext, val scale : Int, directConstructor: Boolean) extends MappedField[BigDecimal,T] {
 
   def this(fieldOwner : T, context : MathContext, scale : Int) =

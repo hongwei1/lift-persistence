@@ -18,7 +18,6 @@ package net.liftweb
 package common
 
 import scala.language.implicitConversions
-import scala.language.existentials
 import scala.reflect.Manifest
 
 import java.util.{Iterator => JavaIterator, ArrayList => JavaArrayList}
