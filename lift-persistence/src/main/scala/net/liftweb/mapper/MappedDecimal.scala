@@ -47,7 +47,18 @@ import scala.xml.{Text, NodeSeq}
  * @param context The MathContext that controls precision and rounding
  * @param scale Controls the scale of the underlying BigDecimal
  */
-abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : MathContext, val scale : Int) extends MappedField[BigDecimal,T] {
+// `directConstructor` carries no information and is never read. Its only job is to
+// give the primary constructor an arity that the three public ones cannot collide
+// with: Scala 3 fails to resolve `this(fieldOwner, context, value.scale)` against
+// the three-parameter form while T is F-bounded (`T <: Mapper[T]`), reporting E134
+// "none of the overloaded alternatives match" even though the arguments match one
+// exactly. Do not inline it away — and note this costs consumers nothing, because
+// the public three-parameter constructor still emits the same signature it always
+// did: `public MappedDecimal(T, java.math.MathContext, int)`.
+abstract class MappedDecimal[T <: Mapper[T]] private (val fieldOwner : T, val context : MathContext, val scale : Int, directConstructor: Boolean) extends MappedField[BigDecimal,T] {
+
+  def this(fieldOwner : T, context : MathContext, scale : Int) =
+    this(fieldOwner, context, scale, true)
 
   /**
    * Constructs a MappedDecimal with the specified initial value and context.
@@ -58,7 +69,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
    * @param context The MathContext that controls precision and rounding
    */
   def this(fieldOwner : T, value : BigDecimal, context : MathContext) = {
-    this(fieldOwner, context, value.scale)
+    this(fieldOwner, context, value.bigDecimal.scale(), true)
     wholeSet(coerce(value))
   }
 
@@ -71,7 +82,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
    * @param value The initial value
    */
   def this(fieldOwner : T, value : BigDecimal) = {
-    this(fieldOwner, MathContext.UNLIMITED, value.scale)
+    this(fieldOwner, MathContext.UNLIMITED, value.bigDecimal.scale(), true)
     wholeSet(coerce(value))
   }
 
@@ -89,7 +100,7 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
     orgData = in
   }
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[BigDecimal] = typeTag[BigDecimal]
 
   /**
@@ -208,4 +219,3 @@ abstract class MappedDecimal[T <: Mapper[T]] (val fieldOwner : T, val context : 
     colName + " DECIMAL" + suffix + notNullAppender()
   }
 }
-

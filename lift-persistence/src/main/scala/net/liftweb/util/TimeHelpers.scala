@@ -337,7 +337,7 @@ trait TimeHelpers { self: ControlHelpers =>
   def weeks(in: Long): Long = days(in) * 7L
 
   /** implicit def used to add the noTime method to the Date class */
-  implicit def toDateExtension(d: Date) = new DateExtension(d)
+  implicit def toDateExtension(d: Date): DateExtension = new DateExtension(d)
 
   /** This class adds a noTime method the Date class, in order to get at Date object starting at 00:00 */
   class DateExtension(date: Date) {
@@ -359,7 +359,7 @@ trait TimeHelpers { self: ControlHelpers =>
   }
 
   /** implicit def used to add the setXXX methods to the Calendar class */
-  implicit def toCalendarExtension(c: Calendar) = new CalendarExtension(c)
+  implicit def toCalendarExtension(c: Calendar): CalendarExtension = new CalendarExtension(c)
 
   /** This class adds the setXXX methods to the Calendar class. Each setter returns the updated Calendar */
   class CalendarExtension(c: Calendar) {

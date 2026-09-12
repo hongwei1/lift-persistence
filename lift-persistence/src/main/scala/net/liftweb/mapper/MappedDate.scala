@@ -28,7 +28,7 @@ import Helpers._
 // OBP fork: webkit removed — date parse/format now go through MapperDateConverter
 // (was LiftRules.dateTimeConverter()); S/js form+JS members had no OBP call-sites.
 import scala.xml.{Text, NodeSeq}
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 /**
  * Represents a date without hour, minute or second fields. The underlying type is
  * java.util.Date to keep things simple, but be aware that the hour, minute and second

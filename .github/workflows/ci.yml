@@ -1,10 +1,11 @@
-name: CI
+name: Commit CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ['**']
   pull_request:
-    branches: [ main ]
+    branches: ['**']
+  workflow_dispatch:
 
 jobs:
   test:
@@ -25,5 +26,5 @@ jobs:
           curl -fL "https://github.com/sbt/sbt/releases/download/v1.10.11/sbt-1.10.11.tgz" | tar xz -C "$HOME"
           echo "$HOME/sbt/bin" >> $GITHUB_PATH
 
-      - name: Run tests (cross-compile 2.12 + 2.13)
-        run: sbt -batch "+test"
+      - name: Run cross-version tests and package
+        run: sbt -batch clean +test +package

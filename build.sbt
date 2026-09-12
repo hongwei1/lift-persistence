@@ -9,13 +9,22 @@ ThisBuild / organizationName   := "WorldWide Conferencing, LLC"
 
 val scala212Version = "2.12.21"
 val scala213Version = "2.13.18"
+val scala3Version   = "3.3.8"
 
 ThisBuild / scalaVersion       := scala212Version
-ThisBuild / crossScalaVersions := Seq(scala212Version, scala213Version)
+ThisBuild / crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version)
 
-ThisBuild / libraryDependencies ++= Seq(specs2, specs2Matchers, specs2Mock, scalacheck, scalactic, scalatest)
+ThisBuild / libraryDependencies ++= {
+  if (scalaBinaryVersion.value == "3")
+    Seq(specs2Scala3, specs2MatchersScala3, scalacheckScala3, scalacticScala3, scalatestScala3)
+  else
+    Seq(specs2, specs2Matchers, specs2Mock, scalacheck, scalactic, scalatest)
+}
 
-ThisBuild / scalacOptions ++= Seq("-deprecation")
+ThisBuild / scalacOptions ++= {
+  val base = Seq("-deprecation")
+  if (scalaBinaryVersion.value == "3") base :+ "-source:3.0-migration" else base
+}
 
 ThisBuild / pomIncludeRepository := { _ => false }
 ThisBuild / scmInfo := Some(ScmInfo(
@@ -33,9 +42,16 @@ lazy val `lift-persistence` =
   Project("lift-persistence", file("lift-persistence"))
     .settings(
       description := "Lift Persistence — OBP fork single-artifact ORM (mapper + db + proto + util + common)",
+      Compile / unmanagedSources ++= {
+        if (scalaBinaryVersion.value == "3") Seq(
+          baseDirectory.value / "src/main/scala-2.13/net/liftweb/mapper/OneToMany.scala",
+          baseDirectory.value / "src/main/scala-2.13/net/liftweb/mapper/ManyToMany.scala"
+        ) else Nil
+      },
       Test / parallelExecution := false,
-      libraryDependencies ++= Seq(
-        scala_reflect(scalaVersion.value),
+      libraryDependencies ++= (if (scalaBinaryVersion.value == "3") Nil else Seq(
+        scala_reflect(scalaVersion.value)
+      )) ++ Seq(
         slf4j_api,
         logback,
         scala_xml,
@@ -46,7 +62,8 @@ lazy val `lift-persistence` =
         jbcrypt,
         // test
         h2,
-        derby
+        derby,
+        postgresql
       ),
       Test / initialize := {
         System.setProperty(

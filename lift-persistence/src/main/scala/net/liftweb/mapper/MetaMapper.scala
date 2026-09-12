@@ -21,7 +21,6 @@ import java.lang.reflect.Method
 import java.sql.{ResultSet, Types, PreparedStatement}
 import java.util.{Date, Locale}
 
-import scala.language.existentials
 
 import scala.collection.mutable.{ListBuffer, HashMap}
 import scala.collection.immutable.{SortedMap, TreeMap}
@@ -286,12 +285,12 @@ trait MetaMapper[A<:Mapper[A]] extends BaseMetaMapper with Mapper[A] {
     val precache: List[PreCache[A, _, _]] = by.toList.flatMap{case j: PreCache[A, _, _] => List[PreCache[A, _, _]](j) case _ => Nil}
     for (j <- precache) {
       type FT = j.field.FieldType
-      type MT = T forSome {type T <: KeyedMapper[FT, T]}
+      type MT = KeyedMapper[FT, _]
 
       val ol: List[MT] = if (!j.deterministic) {
         def filter(in: Seq[FT]): Seq[FT] =
         in.flatMap{
-          case null => Nil
+          case value if value.asInstanceOf[AnyRef] eq null => Nil
           case x: Number if x.longValue == 0L => Nil
           case x => List(x)
         }
@@ -610,7 +609,7 @@ trait MetaMapper[A<:Mapper[A]] extends BaseMetaMapper with Mapper[A] {
 
 
 
-  type AnyBound = T forSome {type T}
+  type AnyBound = Any
 
   private[mapper] def ??(meth: Method, inst: A) = meth.invoke(inst).asInstanceOf[MappedField[AnyBound, A]]
 
@@ -976,7 +975,7 @@ trait MetaMapper[A<:Mapper[A]] extends BaseMetaMapper with Mapper[A] {
   protected def  findApplier(name: String, inst: AnyRef): Box[((A, AnyRef) => Unit)] = synchronized {
     val clz = inst match {
       case null => null
-      case _ => inst.getClass.asInstanceOf[Class[(C forSome {type C})]]
+      case _ => inst.getClass.asInstanceOf[Class[_]]
     }
     val look = (name.toLowerCase, if (clz ne null) Full(clz) else Empty)
     Box(mappedAppliers.get(look) orElse {
@@ -1028,7 +1027,7 @@ trait MetaMapper[A<:Mapper[A]] extends BaseMetaMapper with Mapper[A] {
 
   protected val rootClass = this.getClass.getSuperclass
 
-  private val mappedAppliers = new HashMap[(String, Box[Class[(C forSome {type C})]]), (A, AnyRef) => Unit];
+  private val mappedAppliers = new HashMap[(String, Box[Class[_]]), (A, AnyRef) => Unit];
 
   private val _mappedFields  = new HashMap[String, Method];
 
@@ -1716,8 +1715,7 @@ trait KeyedMetaMapper[Type, A<:KeyedMapper[Type, A]] extends MetaMapper[A] with 
     true
   }
 
-  type Q = MappedForeignKey[AnyBound, A, OO] with MappedField[AnyBound, A] forSome
-  {type OO <: KeyedMapper[AnyBound, OO]}
+  type Q = MappedForeignKey[AnyBound, A, _] with MappedField[AnyBound, A]
 
   private def convertToQPList(prod: Product): Array[QueryParam[A]] = {
     var pos = 0
@@ -1908,4 +1906,3 @@ trait SelectableField {
 }
 
 class MapperException(msg: String) extends Exception(msg)
-

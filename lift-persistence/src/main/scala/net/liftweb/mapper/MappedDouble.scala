@@ -44,7 +44,7 @@ abstract class MappedDouble[T<:Mapper[T]](val fieldOwner: T) extends MappedField
 		orgData = data
 	}
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[Double] = typeTag[Double]
 
   /**
@@ -153,4 +153,3 @@ abstract class MappedDouble[T<:Mapper[T]](val fieldOwner: T) extends MappedField
 
 	def fieldCreatorString(dbType: DriverType, colName: String): String = colName + " " + dbType.doubleColumnType + notNullAppender()
 }
-

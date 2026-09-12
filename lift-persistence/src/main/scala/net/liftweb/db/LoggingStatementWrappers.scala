@@ -353,7 +353,7 @@ object DBLog {
   sealed private[DBLog] class LoggedPreparedStatementHandler (stmt : String, underlying : PreparedStatement) extends LoggedStatementHandler(underlying) {
     override def underlyingClassname = "java.sql.PreparedStatement"
 
-    private var paramMap = Map.empty[Int,Any]
+    private var paramMap = scala.collection.mutable.Map.empty[Int, Any]
 
     // utility method to fill in params
     private def paramified : String = {
@@ -392,7 +392,7 @@ object DBLog {
         }
 
         case "clearParameters" => {
-          paramMap = Map.empty[Int,Any]
+          paramMap = scala.collection.mutable.Map.empty[Int, Any]
           logMeta("Clear parameters") {
               chain(method,  Array())
           }
@@ -484,7 +484,7 @@ object DBLog {
         }
 
         case "setDate" => {
-            paramMap += args(0).asInstanceOf[Int] -> (args(1) + ":" + args(2))
+            paramMap += args(0).asInstanceOf[Int] -> s"${args(1)}:${args(2)}"
             chain(method,  args)
         }
 
@@ -534,7 +534,7 @@ object DBLog {
         }
 
         case "setTime" => {
-            paramMap += args(0).asInstanceOf[Int] -> (args(1) + ":" + args(2))
+            paramMap += args(0).asInstanceOf[Int] -> s"${args(1)}:${args(2)}"
             chain(method,  args)
         }
 
@@ -544,7 +544,7 @@ object DBLog {
         }
 
         case "setTimestamp" => {
-            paramMap += args(0).asInstanceOf[Int] -> (args(1) + ":" + args(2))
+            paramMap += args(0).asInstanceOf[Int] -> s"${args(1)}:${args(2)}"
             chain(method,  args)
         }
 
@@ -609,4 +609,3 @@ object StatementConstantDescriptions {
         case x => "Invalid ResultSet type constant: " + x
     }
 }
-

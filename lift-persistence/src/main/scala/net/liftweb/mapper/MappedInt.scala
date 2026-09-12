@@ -24,7 +24,7 @@ import net.liftweb.util._
 import Helpers._
 import java.util.Date
 // OBP fork: webkit removed — SHtml.selectObj _toForm and asJsExp had no OBP call-sites.
-import reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 import scala.xml.{Text, NodeSeq}
 
 /**
@@ -233,7 +233,7 @@ abstract class MappedInt[T<:Mapper[T]](val fieldOwner: T) extends MappedField[In
    */
   def targetSQLType: Int = Types.INTEGER
 
-  import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
   def manifest: TypeTag[Int] = typeTag[Int]
 
   /**
@@ -343,4 +343,3 @@ abstract class MappedInt[T<:Mapper[T]](val fieldOwner: T) extends MappedField[In
    */
   def fieldCreatorString(dbType: DriverType, colName: String): String = colName + " " + dbType.integerColumnType + notNullAppender()
 }
-

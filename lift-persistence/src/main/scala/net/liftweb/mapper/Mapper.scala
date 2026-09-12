@@ -242,23 +242,35 @@ trait LongKeyedMapper[OwnerType <: LongKeyedMapper[OwnerType]] extends KeyedMapp
   self: OwnerType =>
 }
 
-trait BaseKeyedMapper extends BaseMapper {
+trait BaseKeyedMapper { self: BaseMapper =>
   type TheKeyType
-  type KeyedMapperType <: KeyedMapper[TheKeyType, KeyedMapperType]
+  type KeyedMapperType <: MapperType
 
   def primaryKeyField: MappedField[TheKeyType, MapperType] with IndexedField[TheKeyType]
+  /**
+   * Save the model to the RDBMS.
+   *
+   * Declared here, not just inherited from the self type, because ManyToMany
+   * and any other stackable trait extending BaseKeyedMapper reaches the rest of
+   * the chain through `super.save`, and that only resolves against a member of
+   * this trait. Restoring `extends BaseMapper` would supply it as well, but
+   * Scala 3 rejects that with a cyclic reference at LongKeyedMapper (as it does
+   * the original `KeyedMapperType <: KeyedMapper[TheKeyType, KeyedMapperType]`
+   * bound); both were verified separately against 3.3.8.
+   */
+  def save: Boolean
   /**
    * Delete the model from the RDBMS
    */
   def delete_! : Boolean
 }
 
-trait BaseLongKeyedMapper extends BaseKeyedMapper {
+trait BaseLongKeyedMapper extends BaseKeyedMapper { self: BaseMapper =>
   override type TheKeyType = Long
 }
 
 trait IdPK /* extends BaseLongKeyedMapper */ {
-  self: BaseLongKeyedMapper =>
+  self: BaseLongKeyedMapper with BaseMapper =>
   def primaryKeyField: MappedLongIndex[MapperType] = id
   object id extends MappedLongIndex[MapperType](this.asInstanceOf[MapperType])
 }

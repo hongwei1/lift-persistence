@@ -25,7 +25,7 @@ import net.liftweb.util._
 import net.liftweb.common._
 // OBP fork: webkit removed — SHtml.checkbox _toForm and asJsExp had no OBP call-sites.
 import scala.xml._
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 
 abstract class MappedBoolean[T<:Mapper[T]](val fieldOwner: T) extends MappedField[Boolean, T] {
   private var data : Box[Boolean] = Full(defaultValue)
@@ -147,4 +147,3 @@ abstract class MappedBoolean[T<:Mapper[T]](val fieldOwner: T) extends MappedFiel
    */
   def fieldCreatorString(dbType: DriverType, colName: String): String = colName + " " + dbType.booleanColumnType + notNullAppender()
 }
-

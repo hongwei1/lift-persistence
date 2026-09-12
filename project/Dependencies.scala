@@ -42,6 +42,9 @@ object Dependencies {
   // Scope available only in test classpath, non-transitive by default.
   lazy val derby      = "org.apache.derby"         % "derby"                    % "10.16.1.1" % Test
   lazy val h2database = "com.h2database"           % "h2"                       % "2.4.240"   % Test
+  // DbProviders.PostgreSqlProvider is skipped unless a local Postgres answers, so
+  // this only adds a driver to the test classpath; it does not require a database.
+  lazy val postgresql = "org.postgresql"           % "postgresql"               % "42.7.11"   % Test
 
   lazy val specs2      = "org.specs2"        %% "specs2-core"          % "4.9.4"         % Test
   lazy val scalacheck  = "org.specs2"        %% "specs2-scalacheck"    % specs2.revision % Test
@@ -50,6 +53,14 @@ object Dependencies {
 
   lazy val scalactic       = "org.scalactic"     %% "scalactic"  % "3.1.2"   % Test
   lazy val scalatest       = "org.scalatest"     %% "scalatest"  % "3.1.2"   % Test
+
+  // The legacy test stack predates Scala 3. Keep it for Scala 2 consumers and
+  // use the first maintained cross-published line for the Scala 3 build.
+  lazy val specs2Scala3      = "org.specs2"    %% "specs2-core"          % "4.20.9" % Test
+  lazy val scalacheckScala3  = "org.specs2"    %% "specs2-scalacheck"    % specs2Scala3.revision % Test
+  lazy val specs2MatchersScala3 = "org.specs2" %% "specs2-matcher-extra" % specs2Scala3.revision % Test
+  lazy val scalacticScala3   = "org.scalactic" %% "scalactic"            % "3.2.19" % Test
+  lazy val scalatestScala3   = "org.scalatest" %% "scalatest"            % "3.2.19" % Test
 
   // Aliases
   lazy val h2 = h2database

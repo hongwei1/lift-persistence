@@ -335,7 +335,7 @@ object Schemifier extends Loggable {
         case _ => logger.error("Invalid index: " + index); ""
       }
 
-      val fn = columns.map(_.field._dbColumnNameLC.toLowerCase).sortWith(_ < _)
+      val fn = columns.map(_.field._dbColumnNameLC.toLowerCase).sorted
       if (!indexedFields.contains(fn)) {
         cmds += maybeWrite(performWrite, logFunc, connection) {
           () => createStatement
@@ -349,7 +349,7 @@ object Schemifier extends Loggable {
   private def ensureConstraints(performWrite: Boolean, logFunc: (=> AnyRef) => Unit, table: BaseMetaMapper, dbId: ConnectionIdentifier, connection: SuperConnection, actualTableNames: HashMap[String, String]): Collector = {
     val cmds = new ListBuffer[String]()
     val ret = if (connection.supportsForeignKeys_? && MapperRules.createForeignKeys_?(dbId)) {
-      table.mappedFields.flatMap{f => f match {case f: BaseMappedField with BaseForeignKey => List(f); case _ => Nil}}.toList.flatMap {
+      table.mappedFields.flatMap { f => f match { case foreignKey: BaseForeignKey => List(foreignKey); case _ => Nil } }.toList.flatMap {
         field =>
 
         val other = field.dbKeyToTable
@@ -383,4 +383,3 @@ object Schemifier extends Loggable {
     Collector(ret, cmds.toList)
   }
 }
-

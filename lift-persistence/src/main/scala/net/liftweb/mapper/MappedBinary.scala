@@ -24,7 +24,7 @@ import net.liftweb.util._
 import Helpers._
 import net.liftweb.common._
 // OBP fork: webkit removed — asJsExp (net.liftweb.http.js.JsExp) had no OBP call-sites.
-import scala.reflect.runtime.universe._
+import net.liftweb.util.ReflectionCompat._
 import scala.xml.{Text, NodeSeq}
 
 abstract class MappedBinary[T<:Mapper[T]](val fieldOwner: T) extends MappedField[Array[Byte], T] {
